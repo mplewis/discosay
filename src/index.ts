@@ -2,8 +2,9 @@ import * as Discord from 'discord.js'
 import ferris from './responders/ferris'
 import riir from './responders/riir'
 import roulette from './responders/roulette'
+import annoy from './responders/annoy'
 
-const responders = [ferris, riir, roulette]
+const responders = [ferris, riir, roulette, annoy]
 
 const { TOKEN } = process.env
 if (!TOKEN) throw new Error('TOKEN is unset')
