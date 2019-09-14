@@ -1,0 +1,21 @@
+steps:
+  - id: Test
+    name: "node:12"
+    entrypoint: /bin/sh
+    args:
+      - -c
+      - yarn install; yarn run compile:ci; yarn run test; yarn run lint:ci
+
+  - id: Build
+    name: "gcr.io/cloud-builders/docker"
+    args:
+      - build
+      - -t
+      - gcr.io/$PROJECT_ID/retf-app:$SHORT_SHA
+      - .
+
+  - id: Push
+    name: "gcr.io/cloud-builders/docker"
+    args:
+      - push
+      - gcr.io/$PROJECT_ID/retf-app:$SHORT_SHA
