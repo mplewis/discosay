@@ -4,9 +4,12 @@
   "main": "dist/index.js",
   "scripts": {
     "compile": "tsc",
-    "start": "node dist/index.js"
+    "start": "node dist/index.js",
+    "test": "jest"
   },
   "devDependencies": {
+    "@types/fs-extra": "^8.0.0",
+    "@types/jest": "^24.0.18",
     "@types/node": "^12.7.4",
     "@types/ws": "^6.0.3",
     "@typescript-eslint/eslint-plugin": "^2.1.0",
@@ -17,9 +20,12 @@
     "eslint-plugin-node": ">=9.1.0",
     "eslint-plugin-promise": ">=4.2.1",
     "eslint-plugin-standard": ">=4.0.0",
+    "fs-extra": "^8.1.0",
+    "jest": "^24.9.0",
     "prettier": "^1.18.2",
+    "ts-jest": "^24.1.0",
     "ts-node": "^8.3.0",
-    "typescript": "^3.6.2"
+    "typescript": "^3.6.3"
   },
   "dependencies": {
     "bufferutil": "^4.0.1",
