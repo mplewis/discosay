@@ -5,15 +5,16 @@
   "scripts": {
     "compile": "tsc",
     "start": "node dist/index.js",
-    "test": "jest"
+    "test": "jest",
+    "lint": "eslint --fix ."
   },
   "devDependencies": {
     "@types/fs-extra": "^8.0.0",
     "@types/jest": "^24.0.18",
     "@types/node": "^12.7.4",
     "@types/ws": "^6.0.3",
-    "@typescript-eslint/eslint-plugin": "^2.1.0",
-    "@typescript-eslint/parser": "^2.1.0",
+    "@typescript-eslint/eslint-plugin": "^2.2.0",
+    "@typescript-eslint/parser": "^2.2.0",
     "eslint": ">=6.2.2",
     "eslint-config-standard": "^14.1.0",
     "eslint-plugin-import": ">=2.18.0",
