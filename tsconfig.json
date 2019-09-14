@@ -31,10 +31,11 @@
     ]
   },
   "include": [
-    "src/**/*.ts"
+    "src/**/*.ts",
   ],
   "exclude": [
-    "node_modules/**"
+    "node_modules/**",
+    "src/__spec__/**"
   ],
   "compileOnSave": false
 }
