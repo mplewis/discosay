@@ -7,7 +7,7 @@ const template = `
        / '-----' \\
 `
 
-function bubble (msg: string) {
+function bubble (msg: string): string {
   const width = 4 + msg.length
   let topbot = ''
   for (let i = 0; i < width; i++) {
@@ -17,6 +17,6 @@ function bubble (msg: string) {
   return [topbot, middle, topbot].join('\n')
 }
 
-export default function crab (msg: string) {
+export default function crab (msg: string): string {
   return '```\n' + bubble(msg) + template + '```'
 }
