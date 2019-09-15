@@ -47,12 +47,15 @@ steps:
     entrypoint: /bin/bash
     args:
       - -c
+      - PROJECT_ID="$PROJECT_ID"
       - cloudbuild/gen_kube.sh
 
   - name: "gcr.io/cloud-builders/gcloud"
     id: Push manifest
-    entrypoint: /bin/sh
+    entrypoint: /bin/bash
     args:
+      - -c
+      - COMMIT_SHA="$COMMIT_SHA"
       - cloudbuild/push_kube.sh
     volumes:
       - name: "ssh"
