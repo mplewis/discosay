@@ -19,3 +19,69 @@ steps:
     args:
       - push
       - gcr.io/$PROJECT_ID/retf-app:$SHORT_SHA
+
+  - name: "gcr.io/cloud-builders/gcloud"
+    id: Decrypt SSH key
+    args:
+      - kms
+      - decrypt
+      - --key=projects/airy-charge-246717/locations/global/keyRings/falcor/cryptoKeys/github-deploy
+      - --ciphertext-file=cloudbuild/id_rsa.enc
+      - --plaintext-file=/root/.ssh/id_rsa
+    volumes:
+      - name: "ssh"
+        path: /root/.ssh
+
+  - name: "gcr.io/cloud-builders/git"
+    id: Configure SSH
+    entrypoint: "bash"
+    args:
+      - "-c"
+      - |
+        chmod 600 /root/.ssh/id_rsa
+        cat << EOF > /root/.ssh/config
+        Hostname github.com
+        IdentityFile /root/.ssh/id_rsa
+        EOF
+        mv cloudbuild/known_hosts /root/.ssh/known_hosts
+    volumes:
+      - name: "ssh"
+        path: /root/.ssh
+
+  - name: "gcr.io/cloud-builders/gcloud"
+    id: Clone env repo
+    entrypoint: /bin/sh
+    args:
+      - "-c"
+      - |
+        git clone git@github.com:mplewis/retf-env.git && \
+        cd retf-env && \
+        git checkout candidate && \
+        git config user.email $(gcloud auth list --filter=status:ACTIVE --format='value(account)') && \
+        ls -la .
+    volumes:
+      - name: "ssh"
+        path: /root/.ssh
+
+  - name: "gcr.io/cloud-builders/gcloud"
+    id: Generate manifest
+    entrypoint: /bin/sh
+    args:
+      - "-c"
+      - |
+        sed "s/GOOGLE_CLOUD_PROJECT/${PROJECT_ID}/g" cloudbuild/kubernetes.yaml.tpl | \
+        sed "s/COMMIT_SHA/${SHORT_SHA}/g" > retf-env/kubernetes.yaml
+
+  - name: "gcr.io/cloud-builders/gcloud"
+    id: Push manifest
+    entrypoint: /bin/sh
+    args:
+      - "-c"
+      - |
+        set -x && \
+        cd retf-env && \
+        git add kubernetes.yaml && \
+        git commit -m "Deploying image gcr.io/${PROJECT_ID}/retf:${SHORT_SHA}
+        Built from retf-app @ ${COMMIT_SHA}
+        Author: $(git log --format='%an <%ae>' -n 1 HEAD)" && \
+        git push origin candidate
