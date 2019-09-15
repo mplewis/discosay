@@ -32,33 +32,12 @@ steps:
       - name: "ssh"
         path: /root/.ssh
 
-  - name: "gcr.io/cloud-builders/git"
-    id: Configure SSH
-    entrypoint: "bash"
-    args:
-      - "-c"
-      - |
-        chmod 600 /root/.ssh/id_rsa
-        cat << EOF > /root/.ssh/config
-        Hostname github.com
-        IdentityFile /root/.ssh/id_rsa
-        EOF
-        mv cloudbuild/known_hosts /root/.ssh/known_hosts
-    volumes:
-      - name: "ssh"
-        path: /root/.ssh
-
   - name: "gcr.io/cloud-builders/gcloud"
     id: Clone env repo
-    entrypoint: /bin/sh
+    entrypoint: /bin/bash
     args:
-      - "-c"
-      - |
-        git clone git@github.com:mplewis/retf-env.git && \
-        cd retf-env && \
-        git checkout candidate && \
-        git config user.email $(gcloud auth list --filter=status:ACTIVE --format='value(account)') && \
-        ls -la .
+      - -c
+      - cloudbuild/clone.sh
     volumes:
       - name: "ssh"
         path: /root/.ssh
@@ -67,6 +46,7 @@ steps:
     id: Update manifest
     entrypoint: /bin/bash
     args:
+      - -c
       - cloudbuild/gen_kube.sh
 
   - name: "gcr.io/cloud-builders/gcloud"
@@ -74,3 +54,6 @@ steps:
     entrypoint: /bin/sh
     args:
       - cloudbuild/push_kube.sh
+    volumes:
+      - name: "ssh"
+        path: /root/.ssh
