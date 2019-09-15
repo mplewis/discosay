@@ -48,6 +48,7 @@ steps:
     args:
       - -c
       - PROJECT_ID="$PROJECT_ID"
+      - SHORT_SHA="$SHORT_SHA"
       - cloudbuild/gen_kube.sh
 
   - name: "gcr.io/cloud-builders/gcloud"
@@ -55,7 +56,7 @@ steps:
     entrypoint: /bin/bash
     args:
       - -c
-      - COMMIT_SHA="$COMMIT_SHA"
+      - SHORT_SHA="$SHORT_SHA"
       - cloudbuild/push_kube.sh
     volumes:
       - name: "ssh"
