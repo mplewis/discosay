@@ -8,8 +8,10 @@ steps:
 
   - id: Test
     name: gcr.io/$PROJECT_ID/retf-app:$SHORT_SHA
+    entrypoint: /bin/bash # HACK
     args:
-      - ci
+      - -c
+      - yarn ci
 
   - name: "gcr.io/cloud-builders/gcloud"
     id: Decrypt SSH key
