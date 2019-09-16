@@ -29,7 +29,6 @@ steps:
     id: Clone env repo
     entrypoint: /bin/bash
     args:
-      - -c
       - cloudbuild/clone.sh
     volumes:
       - name: "ssh"
@@ -39,20 +38,18 @@ steps:
     id: Update manifest
     entrypoint: /bin/bash
     args:
-      - -c
-      - >-
-        PROJECT_ID="$PROJECT_ID" \
-        SHORT_SHA="$SHORT_SHA" \
-        cloudbuild/gen_kube.sh
+      - cloudbuild/gen_kube.sh
+    env:
+      - PROJECT_ID=$PROJECT_ID
+      - SHORT_SHA=$SHORT_SHA
 
   - name: "gcr.io/cloud-builders/gcloud"
     id: Push manifest
     entrypoint: /bin/bash
     args:
-      - -c
-      - >-
-        SHORT_SHA="$SHORT_SHA" \
-        cloudbuild/push_kube.sh
+      - cloudbuild/push_kube.sh
+    env:
+      - SHORT_SHA=$SHORT_SHA
     volumes:
       - name: "ssh"
         path: /root/.ssh
