@@ -1,17 +1,16 @@
 steps:
-  # - id: Test
-  #   name: "node:12"
-  #   entrypoint: /bin/sh
-  #   args:
-  #     - -c
-  #     - yarn install; yarn run compile:ci; yarn run test; yarn run lint:ci
+  - id: Build and push
+    name: gcr.io/kaniko-project/executor:latest
+    args:
+      - --destination=gcr.io/$PROJECT_ID/retf-app:$SHORT_SHA
+      - --cache=true
+      - --cache-ttl=24h
 
-  # - id: Build and push
-  #   name: gcr.io/kaniko-project/executor:latest
-  #   args:
-  #     - --destination=gcr.io/$PROJECT_ID/retf-app:$SHORT_SHA
-  #     - --cache=true
-  #     - --cache-ttl=24h
+  - id: Test
+    name: gcr.io/$PROJECT_ID/retf-app:$SHORT_SHA
+    entrypoint: /bin/sh
+    args:
+      - ci
 
   - name: "gcr.io/cloud-builders/gcloud"
     id: Decrypt SSH key
