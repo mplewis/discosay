@@ -9,7 +9,7 @@
     "test:ci": "jest",
     "lint": "eslint --ext=js,ts --fix .",
     "lint:ci": "yarn lint --max-warnings=0",
-    "ci": "rm -rf dist; yarn run test:ci; yarn run lint:ci"
+    "ci": "rm -rf dist; yarn test:ci; yarn lint:ci"
   },
   "devDependencies": {
     "@types/fs-extra": "^8.0.0",
