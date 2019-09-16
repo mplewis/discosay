@@ -6,21 +6,13 @@ steps:
       - --cache=true
       - --cache-ttl=24h
 
-  - id: HACK ls
-    name: gcr.io/$PROJECT_ID/retf-app:$SHORT_SHA
-    dir: /app
-    entrypoint: /bin/bash
-    args:
-      - -c
-      - ls -la
-
   - id: Test
     name: gcr.io/$PROJECT_ID/retf-app:$SHORT_SHA
     dir: /app
     args:
       - ci
 
-  - name: "gcr.io/cloud-builders/gcloud"
+  - name: gcr.io/cloud-builders/gcloud
     id: Decrypt SSH key
     args:
       - kms
@@ -29,19 +21,19 @@ steps:
       - --ciphertext-file=cloudbuild/id_rsa.enc
       - --plaintext-file=/root/.ssh/id_rsa
     volumes:
-      - name: "ssh"
+      - name: ssh
         path: /root/.ssh
 
-  - name: "gcr.io/cloud-builders/gcloud"
+  - name: gcr.io/cloud-builders/gcloud
     id: Clone env repo
     entrypoint: /bin/bash
     args:
       - cloudbuild/clone.sh
     volumes:
-      - name: "ssh"
+      - name: ssh
         path: /root/.ssh
 
-  - name: "gcr.io/cloud-builders/gcloud"
+  - name: gcr.io/cloud-builders/gcloud
     id: Update manifest
     entrypoint: /bin/bash
     args:
@@ -50,7 +42,7 @@ steps:
       - PROJECT_ID=$PROJECT_ID
       - SHORT_SHA=$SHORT_SHA
 
-  - name: "gcr.io/cloud-builders/gcloud"
+  - name: gcr.io/cloud-builders/gcloud
     id: Push manifest
     entrypoint: /bin/bash
     args:
@@ -58,5 +50,5 @@ steps:
     env:
       - SHORT_SHA=$SHORT_SHA
     volumes:
-      - name: "ssh"
+      - name: ssh
         path: /root/.ssh
