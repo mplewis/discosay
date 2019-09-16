@@ -6,12 +6,17 @@ steps:
       # - --cache=true
       # - --cache-ttl=24h
 
-  - id: Test
+  - id: HACK ls
     name: gcr.io/$PROJECT_ID/retf-app:$SHORT_SHA
-    entrypoint: /bin/bash # HACK
+    entrypoint: /bin/bash
     args:
       - -c
-      - yarn ci
+      - ls -la
+
+  - id: Test
+    name: gcr.io/$PROJECT_ID/retf-app:$SHORT_SHA
+    args:
+      - ci
 
   - name: "gcr.io/cloud-builders/gcloud"
     id: Decrypt SSH key
