@@ -6,12 +6,6 @@ steps:
       - --cache=true
       - --cache-ttl=24h
 
-  - id: Push
-    name: gcr.io/cloud-builders/docker
-    args:
-      - push
-      - gcr.io/$PROJECT_ID/retf-app:$SHORT_SHA
-
   - id: HACK ls
     name: gcr.io/$PROJECT_ID/retf-app:$SHORT_SHA
     dir: /app
