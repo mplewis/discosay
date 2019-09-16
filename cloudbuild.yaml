@@ -1,5 +1,5 @@
 steps:
-  - id: Build and push
+  - id: Build
     name: gcr.io/kaniko-project/executor:latest
     args:
       - --destination=gcr.io/$PROJECT_ID/retf-app:$SHORT_SHA
@@ -13,10 +13,20 @@ steps:
       - ci
 
   - name: gcr.io/cloud-builders/gcloud
-    id: Deploy
+    id: Generate
     entrypoint: /bin/bash
     args:
       - cloudbuild/deploy.sh
     env:
       - PROJECT_ID=$PROJECT_ID
       - SHORT_SHA=$SHORT_SHA
+
+  - name: gcr.io/cloud-builders/kubectl
+    id: Deploy
+    args:
+      - apply
+      - -f
+      - kubernetes.yaml
+    env:
+      - CLOUDSDK_COMPUTE_ZONE=us-west1-a
+      - CLOUDSDK_CONTAINER_CLUSTER=nnyc
