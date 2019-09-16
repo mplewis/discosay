@@ -4,6 +4,15 @@ metadata:
   name: retf
 spec:
   replicas: 1
+  minReadySeconds: 15
+  progressDeadlineSeconds: 120
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    app: retf
   template:
     metadata:
       labels:
