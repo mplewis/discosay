@@ -1,5 +1,5 @@
 #!/bin/bash
-set -euo pipefail
+set -euxo pipefail
 IFS=$'\n\t'
 
 INPUT_FILE="cloudbuild/kubernetes.tpl.yaml"
