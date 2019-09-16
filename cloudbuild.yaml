@@ -14,6 +14,7 @@ steps:
 
   - id: HACK ls
     name: gcr.io/$PROJECT_ID/retf-app:$SHORT_SHA
+    dir: /app
     entrypoint: /bin/bash
     args:
       - -c
@@ -21,6 +22,7 @@ steps:
 
   - id: Test
     name: gcr.io/$PROJECT_ID/retf-app:$SHORT_SHA
+    dir: /app
     args:
       - ci
 
