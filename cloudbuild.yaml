@@ -8,7 +8,6 @@ steps:
 
   - id: Test
     name: gcr.io/$PROJECT_ID/retf-app:$SHORT_SHA
-    entrypoint: /bin/sh
     args:
       - ci
 
