@@ -9,4 +9,5 @@ RUN yarn install
 COPY . /app
 RUN yarn compile
 
-CMD yarn start
+ENTRYPOINT ["yarn"]
+CMD ["start"]
