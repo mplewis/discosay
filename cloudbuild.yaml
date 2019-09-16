@@ -13,42 +13,10 @@ steps:
       - ci
 
   - name: gcr.io/cloud-builders/gcloud
-    id: Decrypt SSH key
-    args:
-      - kms
-      - decrypt
-      - --key=projects/airy-charge-246717/locations/global/keyRings/falcor/cryptoKeys/github-deploy
-      - --ciphertext-file=cloudbuild/id_rsa.enc
-      - --plaintext-file=/root/.ssh/id_rsa
-    volumes:
-      - name: ssh
-        path: /root/.ssh
-
-  - name: gcr.io/cloud-builders/gcloud
-    id: Clone env repo
+    id: Deploy
     entrypoint: /bin/bash
     args:
-      - cloudbuild/clone.sh
-    volumes:
-      - name: ssh
-        path: /root/.ssh
-
-  - name: gcr.io/cloud-builders/gcloud
-    id: Update manifest
-    entrypoint: /bin/bash
-    args:
-      - cloudbuild/gen_kube.sh
+      - cloudbuild/deploy.sh
     env:
       - PROJECT_ID=$PROJECT_ID
       - SHORT_SHA=$SHORT_SHA
-
-  - name: gcr.io/cloud-builders/gcloud
-    id: Push manifest
-    entrypoint: /bin/bash
-    args:
-      - cloudbuild/push_kube.sh
-    env:
-      - SHORT_SHA=$SHORT_SHA
-    volumes:
-      - name: ssh
-        path: /root/.ssh
