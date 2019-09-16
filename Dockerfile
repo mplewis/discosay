@@ -9,5 +9,8 @@ RUN yarn install
 COPY . /app
 RUN yarn compile
 
+# HACK
+RUN ls -la
+
 ENTRYPOINT ["yarn"]
 CMD ["start"]
