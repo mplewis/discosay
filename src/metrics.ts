@@ -1,10 +1,11 @@
 import express from 'express'
 import prom from 'prom-client'
 
+const PREFIX = 'retf_'
 const { PORT } = process.env
 const PATH = '/metrics'
 
-prom.collectDefaultMetrics()
+prom.collectDefaultMetrics({ prefix: PREFIX })
 
 const responses = new prom.Counter({
   name: 'responses',
