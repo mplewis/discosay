@@ -29,6 +29,8 @@ spec:
     metadata:
       labels:
         app: retf
+      annotations:
+        prometheus.io/scrape: "true"
     spec:
       containers:
         - name: retf
