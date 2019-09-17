@@ -1,4 +1,5 @@
 import * as Discord from 'discord.js'
+import * as metrics from './metrics'
 import ferris from './responders/ferris'
 import riir from './responders/riir'
 import roulette from './responders/roulette'
@@ -11,12 +12,12 @@ if (!TOKEN) throw new Error('TOKEN is unset')
 
 const client = new Discord.Client()
 
-let name = '<unset>'
+let botUsername = '<unset>'
 client.on('ready', () => {
   const { user } = client
   if (!user) throw new Error('No user on client')
   console.log(`Signed in as ${user.tag}`)
-  name = user.username
+  botUsername = user.username
 })
 
 client.on('message', msg => {
@@ -27,11 +28,17 @@ client.on('message', msg => {
   responders.forEach(responder => {
     if (!responder.applicable(msg)) return
 
-    console.log(`${responder.name} ← ${author.username}: ${msg.content}`)
+    const { username: requesterUsername } = author
+    const { name: responderName } = responder
+
+    metrics.responseSent(requesterUsername, responderName)
+
+    console.log(`${responderName} ← ${requesterUsername}: ${msg.content}`)
     const response = responder.handle(msg)
-    console.log(`${responder.name} → ${name}: ${response}`)
+    console.log(`${responderName} → ${botUsername}: ${response}`)
     msg.channel.send(response)
   })
 })
 
 client.login(TOKEN)
+metrics.serve()

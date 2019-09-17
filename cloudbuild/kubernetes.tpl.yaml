@@ -1,3 +1,14 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: retf
+spec:
+  selector:
+    app: retf
+  ports:
+    - name: metrics
+      port: 80
+---
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
@@ -23,6 +34,8 @@ spec:
         - name: retf
           image: CONTAINER_IMAGE
           env:
+            - name: PORT
+              value: "80"
             - name: TOKEN
               valueFrom:
                 secretKeyRef:
