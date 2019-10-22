@@ -15,4 +15,7 @@ jobs:
           paths:
             - node_modules
           key: deps-{{ checksum "package.json" }}
-      - run: yarn ci
+      - run: yarn compile
+      - run: rm -rf dist
+      - run: yarn test:ci
+      - run: yarn lint:ci
