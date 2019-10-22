@@ -2,3 +2,4 @@
 cloudbuild
 dist
 node_modules
+skaffold.yaml
