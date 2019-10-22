@@ -9,7 +9,7 @@
     "test:ci": "jest",
     "lint": "eslint --ext=js,ts --fix .",
     "lint:ci": "yarn lint --max-warnings=0",
-    "ci": "rm -rf dist; yarn test:ci; yarn lint:ci"
+    "ci": "yarn compile; rm -rf dist; yarn test:ci; yarn lint:ci"
   },
   "devDependencies": {
     "@types/express": "^4.17.1",
