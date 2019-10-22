@@ -5,6 +5,8 @@ import riir from './responders/riir'
 import roulette from './responders/roulette'
 import annoy from './responders/annoy'
 
+process.on('unhandledRejection', function (err) { throw err })
+
 const responders = [ferris, riir, roulette, annoy]
 
 const { TOKEN } = process.env
