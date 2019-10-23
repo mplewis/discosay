@@ -35,7 +35,7 @@ workflows:
   build_and_push:
     jobs:
       - build
-      - push:
+      - push_image:
           requires:
             - build
           # filters:
