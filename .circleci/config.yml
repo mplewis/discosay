@@ -19,3 +19,13 @@ jobs:
       - run: rm -rf dist
       - run: yarn test:ci
       - run: yarn lint:ci
+
+  push_image:
+    docker:
+      - image: circleci/node:12.9.1
+    working_directory: ~/repo
+    steps:
+      - run: |
+          curl -Lo skaffold https://storage.googleapis.com/skaffold/releases/latest/skaffold-linux-amd64;
+          chmod +x skaffold
+      - run: skaffold run
