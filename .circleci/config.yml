@@ -29,3 +29,15 @@ jobs:
           curl -Lo skaffold https://storage.googleapis.com/skaffold/releases/latest/skaffold-linux-amd64;
           chmod +x skaffold
       - run: skaffold run
+
+workflows:
+  version: 2
+  build_and_push:
+    jobs:
+      - build
+      - push:
+          requires:
+            - build
+          # filters:
+          #   branches:
+          #     only: master
