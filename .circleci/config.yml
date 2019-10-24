@@ -25,6 +25,7 @@ jobs:
       - image: circleci/node:12.9.1
     working_directory: ~/repo
     steps:
+      - checkout
       - run: |
           curl -Lo /tmp/skaffold https://storage.googleapis.com/skaffold/releases/latest/skaffold-linux-amd64;
           chmod +x /tmp/skaffold
