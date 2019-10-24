@@ -4,6 +4,8 @@ metadata:
   name: retf
 
 build:
+  googleCloudBuild: {}
   artifacts:
     - image: gcr.io/airy-charge-246717/retf
-  googleCloudBuild: {}
+      kaniko:
+        cache: {}
