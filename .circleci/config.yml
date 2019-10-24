@@ -27,7 +27,7 @@ jobs:
     steps:
       - checkout
       - run: |
-          curl -Lo /tmp/skaffold https://storage.googleapis.com/skaffold/releases/latest/skaffold-linux-amd64;
+          curl -Lo /tmp/skaffold https://storage.googleapis.com/skaffold/releases/v0.40.0/skaffold-linux-amd64;
           chmod +x /tmp/skaffold
       - run: /tmp/skaffold run
 
