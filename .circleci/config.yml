@@ -27,11 +27,10 @@ jobs:
     steps:
       - checkout
       - run: echo $GCP_TOKEN > /root/gcp_token.json
-      - run: export GOOGLE_APPLICATION_CREDENTIALS=/root/gcp_token.json
       - run: |
-          curl -Lo /tmp/skaffold https://storage.googleapis.com/skaffold/releases/v0.40.0/skaffold-linux-amd64;
+          curl -Lo /tmp/skaffold https://storage.googleapis.com/skaffold/releases/v0.40.0/skaffold-linux-amd64
           chmod +x /tmp/skaffold
-      - run: /tmp/skaffold run
+      - run: GOOGLE_APPLICATION_CREDENTIALS=/root/gcp_token.json /tmp/skaffold run
 
 workflows:
   version: 2
