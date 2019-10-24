@@ -22,10 +22,14 @@ jobs:
 
   push_image:
     docker:
-      - image: circleci/node:12.9.1
+      - image: google/cloud-sdk:268.0.0
     working_directory: ~/repo
     steps:
       - checkout
+      - run: |
+          echo $GCP_TOKEN | gcloud auth activate-service-account --key-file=-
+          gcloud --quiet config set project ${GCP_PROJECT}
+          gcloud --quiet config set compute/zone ${GCP_ZONE}
       - run: |
           curl -Lo /tmp/skaffold https://storage.googleapis.com/skaffold/releases/v0.40.0/skaffold-linux-amd64;
           chmod +x /tmp/skaffold
