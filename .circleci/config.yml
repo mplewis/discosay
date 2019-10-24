@@ -26,9 +26,9 @@ jobs:
     working_directory: ~/repo
     steps:
       - run: |
-          curl -Lo skaffold https://storage.googleapis.com/skaffold/releases/latest/skaffold-linux-amd64;
-          chmod +x skaffold
-      - run: ./skaffold run
+          curl -Lo /tmp/skaffold https://storage.googleapis.com/skaffold/releases/latest/skaffold-linux-amd64;
+          chmod +x /tmp/skaffold
+      - run: /tmp/skaffold run
 
 workflows:
   version: 2
