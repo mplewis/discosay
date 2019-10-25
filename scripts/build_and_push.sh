@@ -6,6 +6,9 @@ cd ~
 
 echo "$GCP_TOKEN" > gcp_token.json
 export GOOGLE_APPLICATION_CREDENTIALS="$HOME/gcp_token.json"
+gcloud auth activate-service-account --key-file=~/gcp_token.json
+gcloud --quiet config set project "$GCP_PROJECT"
+gcloud --quiet config set compute/zone "$GCP_ZONE"
 
 curl -Lo skaffold https://storage.googleapis.com/skaffold/releases/v0.40.0/skaffold-linux-amd64
 chmod +x skaffold
