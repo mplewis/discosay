@@ -26,11 +26,7 @@ jobs:
     working_directory: ~/repo
     steps:
       - checkout
-      - run: echo $GCP_TOKEN > /root/gcp_token.json
-      - run: |
-          curl -Lo /tmp/skaffold https://storage.googleapis.com/skaffold/releases/v0.40.0/skaffold-linux-amd64
-          chmod +x /tmp/skaffold
-      - run: GOOGLE_APPLICATION_CREDENTIALS=/root/gcp_token.json /tmp/skaffold run
+      - run: scripts/build_and_push.sh
 
 workflows:
   version: 2
