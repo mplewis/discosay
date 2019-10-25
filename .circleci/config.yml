@@ -27,6 +27,7 @@ jobs:
     steps:
       - checkout
       - run: scripts/build_and_push.sh
+      - run: scripts/deploy.sh
 
 workflows:
   version: 2
