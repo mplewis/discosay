@@ -1,5 +1,5 @@
 #!/bin/bash
-set -euo pipefail
+set -euxo pipefail
 IFS=$'\n\t'
 
 cd ~
@@ -9,5 +9,8 @@ export GOOGLE_APPLICATION_CREDENTIALS="$HOME/gcp_token.json"
 
 curl -Lo skaffold https://storage.googleapis.com/skaffold/releases/v0.40.0/skaffold-linux-amd64
 chmod +x skaffold
-./skaffold run --quiet > skaffold_output.json
+(
+  cd ~/repo
+  ../skaffold build --quiet > ~/skaffold_output.json
+)
 cat skaffold_output.json
