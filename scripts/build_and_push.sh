@@ -11,6 +11,6 @@ curl -Lo skaffold https://storage.googleapis.com/skaffold/releases/v0.40.0/skaff
 chmod +x skaffold
 (
   cd ~/repo
-  ../skaffold build --quiet > ~/skaffold_output.json
+  ~/skaffold build --quiet > ~/skaffold_output.json
 )
 cat skaffold_output.json
