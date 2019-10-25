@@ -11,5 +11,5 @@ chmod a+x jq
 
 export IMAGE
 IMAGE="$(./jq '.builds[0].tag' -r < skaffold_output.json)"
-sed "s/CONTAINER_IMAGE/$IMAGE/" < "$TEMPLATE" > retf.yaml
+sed "s+CONTAINER_IMAGE+$IMAGE+" < "$TEMPLATE" > retf.yaml
 cat retf.yaml
