@@ -47,10 +47,11 @@ workflows:
   version: 2
   build_and_push:
     jobs:
-      - build
-      - push_image:
-          requires:
-            - build
-          # filters:
-          #   branches:
-          #     only: master
+      - gcloud
+      # - build
+      # - push_image:
+      #     requires:
+      #       - build
+      #     # filters:
+      #     #   branches:
+      #     #     only: master
