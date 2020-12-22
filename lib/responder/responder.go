@@ -1,6 +1,7 @@
 package responder
 
 import (
+	"fmt"
 	"log"
 	"math/rand"
 	"regexp"
@@ -23,6 +24,20 @@ type Responder struct {
 	// Optional. If provided, the probability from 0.0 to 1.0 that this
 	// responder will fire on any given matched message
 	Probability *float64
+}
+
+func (r *Responder) String() string {
+	tmpl := "no template"
+	if r.Template != nil {
+		tmpl = fmt.Sprintf("template %s (%d chars)", *r.TemplateName, len(*r.Template))
+	}
+	prob := "always"
+	if r.Probability != nil {
+		prob = fmt.Sprintf("with prob. %f", *r.Probability)
+	}
+	return fmt.Sprintf(
+		"{Responder %s: match /%s/, %d response(s), %s, fires %s}",
+		*r.Name, r.Match.String(), len(*r.Responses), tmpl, prob)
 }
 
 func Parse(name string, from map[string]interface{}) (*Responder, error) {

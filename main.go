@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"io/ioutil"
 	"log"
 	"math/rand"
@@ -11,6 +12,11 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+type botSpec struct {
+	name       string
+	responders []*responder.Responder
+}
+
 func env(key string) string {
 	val := os.Getenv(key)
 	if val == "" {
@@ -19,7 +25,7 @@ func env(key string) string {
 	return val
 }
 
-func parseConfig(rawYaml []byte) ([]responder.Responder, error) {
+func parseConfig(rawYaml []byte) ([]botSpec, error) {
 	config := make(map[string]interface{})
 	err := yaml.Unmarshal(rawYaml, config)
 	if err != nil {
@@ -31,7 +37,7 @@ func parseConfig(rawYaml []byte) ([]responder.Responder, error) {
 		templates[name] = template.(string)
 	}
 
-	responders := []responder.Responder{}
+	responders := map[string]responder.Responder{}
 	for name, rspec := range config["responders"].(map[string]interface{}) {
 		spec := rspec.(map[string]interface{})
 		r, err := responder.Parse(name, spec)
@@ -43,9 +49,20 @@ func parseConfig(rawYaml []byte) ([]responder.Responder, error) {
 			template := templates[*r.TemplateName]
 			r.Template = &template
 		}
-		responders = append(responders, *r)
+		responders[*r.Name] = *r
 	}
-	return responders, err
+
+	botSpecs := []botSpec{}
+	for name, respNames := range config["bots"].(map[string]interface{}) {
+
+		s := botSpec{name: name}
+		for _, rawName := range respNames.([]interface{}) {
+			responder := responders[rawName.(string)]
+			s.responders = append(s.responders, &responder)
+		}
+		botSpecs = append(botSpecs, s)
+	}
+	return botSpecs, nil
 }
 
 func test(resp responder.Responder, msg string) {
@@ -64,16 +81,15 @@ func main() {
 		log.Fatal(err)
 	}
 
-	responders, err := parseConfig(rawYaml)
+	botSpecs, err := parseConfig(rawYaml)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	for _, r := range responders {
-		test(r, "!riir")
-		test(r, "!retf")
-		test(r, "!retf Rust rules!")
-		test(r, "!gotime")
-		test(r, "!gotime yay for go!")
+	for _, botSpec := range botSpecs {
+		fmt.Println(botSpec.name)
+		for _, resp := range botSpec.responders {
+			fmt.Println(resp)
+		}
 	}
 }
