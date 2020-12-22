@@ -14,6 +14,9 @@ type Responder struct {
 	// Optional. A list of responses, from which one is randomly selected
 	Responses *[]string
 
+	// Optional. Metadata that specifies the template to be used
+	TemplateName *string
+
 	// Optional. Insert the response into this template, replacing $MSG. If omitted, just send the response as-is
 	Template *string
 
@@ -48,11 +51,11 @@ func Parse(name *string, from map[string]interface{}) (*Responder, error) {
 	}
 
 	return &Responder{
-		Name:        name,
-		Match:       re,
-		Responses:   &responses,
-		Template:    template,
-		Probability: probability,
+		Name:         name,
+		Match:        re,
+		Responses:    &responses,
+		TemplateName: template,
+		Probability:  probability,
 	}, err
 }
 

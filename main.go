@@ -34,8 +34,11 @@ func main() {
 	}
 	log.Printf("%#v\n", config)
 
-	// templates := config["templates"]
 	// log.Printf("%#v\n", templates)
+	templates := map[string]string{}
+	for name, template := range config["templates"].(map[string]interface{}) {
+		templates[name] = template.(string)
+	}
 
 	// bots := config["bots"]
 	// log.Printf("%#v\n", bots)
@@ -49,6 +52,10 @@ func main() {
 		r, err := responder.Parse(&name, spec)
 		if err != nil {
 			log.Fatal(err)
+		}
+		if r.TemplateName != nil {
+			template := templates[*r.TemplateName]
+			r.Template = &template
 		}
 		log.Printf("%#v\n", r)
 
