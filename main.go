@@ -40,7 +40,7 @@ func parseConfig(rawYaml []byte) ([]botSpec, error) {
 	responders := map[string]responder.Responder{}
 	for name, rspec := range config["responders"].(map[string]interface{}) {
 		spec := rspec.(map[string]interface{})
-		r, err := responder.Parse(name, spec)
+		r, err := responder.New(name, spec)
 		if err != nil {
 			return nil, err
 		}

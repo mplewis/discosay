@@ -8,6 +8,7 @@ import (
 	"strings"
 )
 
+// Responder is a set of stimuli and response behavior used by a Bot.
 type Responder struct {
 	Name  *string        // The name of the responder
 	Match *regexp.Regexp // Only respond to messages that match this regex
@@ -40,7 +41,8 @@ func (r *Responder) String() string {
 		*r.Name, r.Match.String(), len(*r.Responses), tmpl, prob)
 }
 
-func Parse(name string, from map[string]interface{}) (*Responder, error) {
+// New builds a Responder from a YAML config blob.
+func New(name string, from map[string]interface{}) (*Responder, error) {
 	re, err := regexp.Compile(from["match"].(string))
 	if err != nil {
 		return nil, err
@@ -74,6 +76,29 @@ func Parse(name string, from map[string]interface{}) (*Responder, error) {
 	}, err
 }
 
+// Respond returns what a responder chose to say in reply to a message, if anything.
+func (r *Responder) Respond(in string) *string {
+	matched, msg := r.match(in)
+	if !matched {
+		log.Println("not matched")
+		return nil
+	}
+	if msg == nil {
+		log.Println("no capture")
+		msg = r.response()
+	}
+	if msg == nil {
+		log.Println("no response")
+		return nil
+	}
+	if r.Template != nil {
+		log.Println("using template")
+		m := strings.Replace(*r.Template, "$MSG", *msg, 1)
+		msg = &m
+	}
+	return msg
+}
+
 func (r *Responder) roll() bool {
 	if r.Probability == nil {
 		return true
@@ -97,26 +122,4 @@ func (r *Responder) response() *string {
 		return nil
 	}
 	return &(*r.Responses)[rand.Intn(len(*r.Responses))]
-}
-
-func (r *Responder) Respond(in string) *string {
-	matched, msg := r.match(in)
-	if !matched {
-		log.Println("not matched")
-		return nil
-	}
-	if msg == nil {
-		log.Println("no capture")
-		msg = r.response()
-	}
-	if msg == nil {
-		log.Println("no response")
-		return nil
-	}
-	if r.Template != nil {
-		log.Println("using template")
-		m := strings.Replace(*r.Template, "$MSG", *msg, 1)
-		msg = &m
-	}
-	return msg
 }
