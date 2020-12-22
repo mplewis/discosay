@@ -8,99 +8,97 @@ import (
 )
 
 type Responder struct {
-	Name  string         // The name of the responder
+	Name  *string        // The name of the responder
 	Match *regexp.Regexp // Only respond to messages that match this regex
 
 	// Optional. A list of responses, from which one is randomly selected
-	Responses []string
+	Responses *[]string
 
 	// Optional. Insert the response into this template, replacing $MSG. If omitted, just send the response as-is
-	Template string
+	Template *string
 
 	// Optional. If provided, the probability from 0.0 to 1.0 that this
 	// responder will fire on any given matched message
-	Probability float32
+	Probability *float64
 }
 
-func Parse(name string, from map[string]interface{}) (*Responder, error) {
+func Parse(name *string, from map[string]interface{}) (*Responder, error) {
 	re, err := regexp.Compile(from["match"].(string))
 	if err != nil {
 		return nil, err
 	}
 
-	log.Println(from["responses"])
 	responses := []string{}
-	rawResps, found := from["responses"]
-	if found {
-		for _, resp := range rawResps.([]interface{}) {
+	if rr := from["responses"]; rr != nil {
+		for _, resp := range rr.([]interface{}) {
 			responses = append(responses, resp.(string))
 		}
 	}
-	log.Println(responses)
 
-	probability, found := from["probability"].(float32)
-	if !found {
-		probability = 0.0
+	var template *string = nil
+	if tp := from["template"]; tp != nil {
+		s := tp.(string)
+		template = &s
 	}
 
-	template, found := from["template"].(string)
-	if !found {
-		template = ""
+	var probability *float64 = nil
+	if pb := from["probability"]; pb != nil {
+		f := pb.(float64)
+		probability = &f
 	}
 
 	return &Responder{
 		Name:        name,
 		Match:       re,
-		Responses:   responses,
+		Responses:   &responses,
 		Template:    template,
 		Probability: probability,
 	}, err
 }
 
 func (r *Responder) roll() bool {
-	if r.Probability > 0.0 && rand.Float32() > r.Probability {
-		return false
+	if r.Probability == nil {
+		return true
 	}
-	return true
+	return rand.Float64() <= *r.Probability
 }
 
-func (r *Responder) match(msg string) (bool, string) {
+func (r *Responder) match(msg string) (bool, *string) {
 	m := r.Match.FindStringSubmatch(msg)
 	if m == nil {
-		return false, ""
+		return false, nil
 	}
 	if len(m) < 2 {
-		return true, ""
+		return true, nil
 	}
-	return true, m[1]
+	return true, &m[1]
 }
 
-func (r *Responder) response() string {
-	rc := len(r.Responses)
-	if rc == 0 {
-		return ""
+func (r *Responder) response() *string {
+	if r.Responses == nil {
+		return nil
 	}
-	return r.Responses[rand.Intn(rc)]
+	return &(*r.Responses)[rand.Intn(len(*r.Responses))]
 }
 
 func (r *Responder) Respond(in string) *string {
-	matched, substr := r.match(in)
+	matched, msg := r.match(in)
 	if !matched {
 		log.Println("not matched")
 		return nil
 	}
-	msg := substr
-	if msg == "" {
-		log.Println("no captured msg")
+	if msg == nil {
+		log.Println("no capture")
 		msg = r.response()
 	}
-	if msg == "" {
-		log.Println("no response msg")
+	if msg == nil {
+		log.Println("no response")
 		return nil
 	}
-	if r.Template != "" {
+	if r.Template != nil {
 		log.Println("using template")
-		msg = strings.Replace(r.Template, "$MSG", msg, 1)
+		m := strings.Replace(*r.Template, "$MSG", *msg, 1)
+		msg = &m
 	}
-	return &msg
+	return msg
 }

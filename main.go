@@ -14,7 +14,7 @@ import (
 func env(key string) string {
 	val := os.Getenv(key)
 	if val == "" {
-		log.Fatalf("Missing mandatory environment variable: %s", val)
+		log.Fatalf("Missing mandatory environment variable: %s", key)
 	}
 	return val
 }
@@ -46,7 +46,7 @@ func main() {
 	for name, rspec := range responders {
 		spec := rspec.(map[string]interface{})
 		log.Printf("%#v: %#v\n", name, spec)
-		r, err := responder.Parse(name, spec)
+		r, err := responder.Parse(&name, spec)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -54,27 +54,27 @@ func main() {
 
 		response := r.Respond("!riir")
 		if response != nil {
-			log.Printf("-> %s: %s", r.Name, *response)
+			log.Printf("-> %s: %s", *r.Name, *response)
 		}
 
 		response = r.Respond("!retf")
 		if response != nil {
-			log.Printf("-> %s: %s", r.Name, *response)
+			log.Printf("-> %s: %s", *r.Name, *response)
 		}
 
 		response = r.Respond("!retf Rust rules!")
 		if response != nil {
-			log.Printf("-> %s: %s", r.Name, *response)
+			log.Printf("-> %s: %s", *r.Name, *response)
 		}
 
 		response = r.Respond("!gotime")
 		if response != nil {
-			log.Printf("-> %s: %s", r.Name, *response)
+			log.Printf("-> %s: %s", *r.Name, *response)
 		}
 
 		response = r.Respond("!gotime yay for go!")
 		if response != nil {
-			log.Printf("-> %s: %s", r.Name, *response)
+			log.Printf("-> %s: %s", *r.Name, *response)
 		}
 	}
 
