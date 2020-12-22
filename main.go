@@ -6,8 +6,12 @@ import (
 	"log"
 	"math/rand"
 	"os"
+	"os/signal"
+	"strings"
+	"syscall"
 	"time"
 
+	"github.com/mplewis/discosay/lib/bot"
 	"github.com/mplewis/discosay/lib/responder"
 	"gopkg.in/yaml.v3"
 )
@@ -86,10 +90,34 @@ func main() {
 		log.Fatal(err)
 	}
 
+	fmt.Println("Registered bots:")
 	for _, botSpec := range botSpecs {
 		fmt.Println(botSpec.name)
 		for _, resp := range botSpec.responders {
-			fmt.Println(resp)
+			fmt.Printf("    %s\n", resp)
+		}
+	}
+
+	fmt.Println("Connecting...")
+	bots := []*bot.Bot{}
+	for _, botSpec := range botSpecs {
+		authToken := env(fmt.Sprintf("%s_AUTH_TOKEN", strings.ToUpper(botSpec.name)))
+		b, err := bot.New(botSpec.name, authToken, botSpec.responders)
+		if err != nil {
+			log.Fatal(err)
+		}
+		log.Printf("%s connected.", *b.Name)
+		bots = append(bots, b)
+	}
+
+	sc := make(chan os.Signal, 1)
+	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt, os.Kill)
+	<-sc
+
+	fmt.Println("Shutting down...")
+	for _, b := range bots {
+		if err := b.Close(); err != nil {
+			log.Println(err)
 		}
 	}
 }

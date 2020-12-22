@@ -1,5 +1,6 @@
 templates:
   ferris: |
+    ```
     $MSG
     ------------------------
       \
@@ -8,7 +9,9 @@ templates:
      \) /  o o  \ (/
        '_   -   _'
        / '-----' \
+    ```
   gopher: |
+    ```
     $MSG
     ------------------------
       \
@@ -23,9 +26,10 @@ templates:
       ]             ~ ~             |
       |                            |
        |                           |
+    ```
 
 bots:
-  ferris:
+  retf:
     - retf
     - ferrisay
     - riir
@@ -36,7 +40,7 @@ bots:
 
 responders:
   gosay:
-    match: "^!gotime (.+)$"
+    match: "^!gosay (.+)$"
     template: gopher
   gotime:
     match: "^!gotime$"
@@ -49,7 +53,7 @@ responders:
     responses:
       - REWRITE IT IN RUST
   ferrisay:
-    match: "^!retf (.+)$"
+    match: "^!ferrisay (.+)$"
     template: ferris
   retf:
     match: "^!retf$"
@@ -65,7 +69,7 @@ responders:
       - bro, you just coded cringe. you are going to leak pointer
   rustannoy:
     probability: 0.1
-    match: rust
+    match: \brust\b
     responses:
       - Did someone say Rust?
       - Rust is the best language

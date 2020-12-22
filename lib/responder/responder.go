@@ -88,7 +88,11 @@ func (r *Responder) Respond(in string) *string {
 		msg = r.response()
 	}
 	if msg == nil {
-		log.Println("no response")
+		log.Println("no capture, no response")
+		return nil
+	}
+	if !r.roll() {
+		fmt.Println("not responding due to probability")
 		return nil
 	}
 	if r.Template != nil {
