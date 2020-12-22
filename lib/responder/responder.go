@@ -25,7 +25,7 @@ type Responder struct {
 	Probability *float64
 }
 
-func Parse(name *string, from map[string]interface{}) (*Responder, error) {
+func Parse(name string, from map[string]interface{}) (*Responder, error) {
 	re, err := regexp.Compile(from["match"].(string))
 	if err != nil {
 		return nil, err
@@ -51,7 +51,7 @@ func Parse(name *string, from map[string]interface{}) (*Responder, error) {
 	}
 
 	return &Responder{
-		Name:         name,
+		Name:         &name,
 		Match:        re,
 		Responses:    &responses,
 		TemplateName: template,

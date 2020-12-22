@@ -19,6 +19,42 @@ func env(key string) string {
 	return val
 }
 
+func parseConfig(rawYaml []byte) ([]responder.Responder, error) {
+	config := make(map[string]interface{})
+	err := yaml.Unmarshal(rawYaml, config)
+	if err != nil {
+		return nil, err
+	}
+
+	templates := map[string]string{}
+	for name, template := range config["templates"].(map[string]interface{}) {
+		templates[name] = template.(string)
+	}
+
+	responders := []responder.Responder{}
+	for name, rspec := range config["responders"].(map[string]interface{}) {
+		spec := rspec.(map[string]interface{})
+		r, err := responder.Parse(name, spec)
+		if err != nil {
+			return nil, err
+		}
+
+		if r.TemplateName != nil {
+			template := templates[*r.TemplateName]
+			r.Template = &template
+		}
+		responders = append(responders, *r)
+	}
+	return responders, err
+}
+
+func test(resp responder.Responder, msg string) {
+	response := resp.Respond(msg)
+	if response != nil {
+		log.Printf("-> %s: %s", *resp.Name, *response)
+	}
+}
+
 func main() {
 	rand.Seed(time.Now().UTC().UnixNano())
 
@@ -27,83 +63,17 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	config := make(map[string]interface{})
-	err = yaml.Unmarshal(rawYaml, config)
+
+	responders, err := parseConfig(rawYaml)
 	if err != nil {
 		log.Fatal(err)
 	}
-	log.Printf("%#v\n", config)
 
-	// log.Printf("%#v\n", templates)
-	templates := map[string]string{}
-	for name, template := range config["templates"].(map[string]interface{}) {
-		templates[name] = template.(string)
+	for _, r := range responders {
+		test(r, "!riir")
+		test(r, "!retf")
+		test(r, "!retf Rust rules!")
+		test(r, "!gotime")
+		test(r, "!gotime yay for go!")
 	}
-
-	// bots := config["bots"]
-	// log.Printf("%#v\n", bots)
-
-	responders := config["responders"].(map[string]interface{})
-	// log.Printf("%#v\n", responders)
-
-	for name, rspec := range responders {
-		spec := rspec.(map[string]interface{})
-		log.Printf("%#v: %#v\n", name, spec)
-		r, err := responder.Parse(&name, spec)
-		if err != nil {
-			log.Fatal(err)
-		}
-		if r.TemplateName != nil {
-			template := templates[*r.TemplateName]
-			r.Template = &template
-		}
-		log.Printf("%#v\n", r)
-
-		response := r.Respond("!riir")
-		if response != nil {
-			log.Printf("-> %s: %s", *r.Name, *response)
-		}
-
-		response = r.Respond("!retf")
-		if response != nil {
-			log.Printf("-> %s: %s", *r.Name, *response)
-		}
-
-		response = r.Respond("!retf Rust rules!")
-		if response != nil {
-			log.Printf("-> %s: %s", *r.Name, *response)
-		}
-
-		response = r.Respond("!gotime")
-		if response != nil {
-			log.Printf("-> %s: %s", *r.Name, *response)
-		}
-
-		response = r.Respond("!gotime yay for go!")
-		if response != nil {
-			log.Printf("-> %s: %s", *r.Name, *response)
-		}
-	}
-
-	// x, err := regexp.Compile("^!cheer$")
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-	// r := responder.Responder{
-	// 	Name:      "cheer",
-	// 	Match:     *x,
-	// 	Responses: []string{"yay!", "hooray!"},
-	// }
-	// log.Println(*r.Respond("!cheer"))
-
-	// x, err = regexp.Compile("^!say (.+)$")
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-	// r = responder.Responder{
-	// 	Name:     "say",
-	// 	Match:    *x,
-	// 	Template: "$MSG!",
-	// }
-	// log.Println(*r.Respond("!say Hi"))
 }
