@@ -26,7 +26,6 @@ func env(key string) string {
 }
 
 func main() {
-
 	zerolog.SetGlobalLevel(zerolog.InfoLevel)
 	if os.Getenv("DEBUG") != "" {
 		zerolog.SetGlobalLevel(zerolog.DebugLevel)
