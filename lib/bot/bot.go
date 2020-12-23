@@ -12,13 +12,20 @@ type Bot struct {
 	sess *discordgo.Session
 }
 
+// Spec is the data needed to build and connect a bot.
+type Spec struct {
+	Name       string
+	AuthToken  string
+	Responders []*responder.Responder
+}
+
 // New builds a bot and connects it to Discord.
-func New(name string, authToken string, responders []*responder.Responder) (*Bot, error) {
-	sess, err := discordgo.New("Bot " + authToken)
+func New(spec Spec) (*Bot, error) {
+	sess, err := discordgo.New("Bot " + spec.AuthToken)
 	if err != nil {
 		return nil, err
 	}
-	handler := buildMessageHandler(&name, responders)
+	handler := buildMessageHandler(&spec.Name, spec.Responders)
 	sess.AddHandler(handler)
 
 	err = sess.Open()
@@ -26,7 +33,7 @@ func New(name string, authToken string, responders []*responder.Responder) (*Bot
 		return nil, err
 	}
 
-	b := Bot{&name, sess}
+	b := Bot{&spec.Name, sess}
 	return &b, nil
 }
 
