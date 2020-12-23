@@ -2,10 +2,11 @@ package responder
 
 import (
 	"fmt"
-	"log"
 	"math/rand"
 	"regexp"
 	"strings"
+
+	"github.com/rs/zerolog/log"
 )
 
 // Responder is a set of stimuli and response behavior used by a Bot.
@@ -78,25 +79,25 @@ func New(name string, from map[string]interface{}) (*Responder, error) {
 
 // Respond returns what a responder chose to say in reply to a message, if anything.
 func (r *Responder) Respond(in string) *string {
+	l := log.Debug().Str("responder", *r.Name)
 	matched, msg := r.match(in)
 	if !matched {
-		log.Println("not matched")
+		l.Msg("not matched")
 		return nil
 	}
 	if msg == nil {
-		log.Println("no capture")
 		msg = r.response()
 	}
 	if msg == nil {
-		log.Println("no capture, no response")
+		l.Msg("no capture, no response")
 		return nil
 	}
 	if !r.roll() {
-		fmt.Println("not responding due to probability")
+		l.Msg("not responding due to probability")
 		return nil
 	}
 	if r.Template != nil {
-		log.Println("using template")
+		l.Msg("using template")
 		m := strings.Replace(*r.Template, "$MSG", *msg, 1)
 		msg = &m
 	}

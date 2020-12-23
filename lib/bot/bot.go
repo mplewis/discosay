@@ -1,10 +1,9 @@
 package bot
 
 import (
-	"log"
-
 	"github.com/bwmarrin/discordgo"
 	"github.com/mplewis/discosay/lib/responder"
+	"github.com/rs/zerolog/log"
 )
 
 // Bot is a set of Responders connected to Discord.
@@ -37,14 +36,18 @@ func (b *Bot) Close() error {
 }
 
 func buildMessageHandler(botName *string, responders []*responder.Responder) func(*discordgo.Session, *discordgo.MessageCreate) {
+	l := log.Info().Str("bot", *botName)
 	return func(s *discordgo.Session, m *discordgo.MessageCreate) {
 		if m.Author.ID == s.State.User.ID {
 			return
 		}
 		for _, r := range responders {
 			if out := r.Respond(m.Message.Content); out != nil {
-				log.Printf("<- %s: %s", m.Author.Username, m.Message.Content)
-				log.Printf("-> %s(%s): %s", *botName, *r.Name, *out)
+				l.Str("inUser", m.Author.Username).
+					Str("inMsg", m.Message.Content).
+					Str("responder", *r.Name).
+					Str("msg", *out).
+					Send()
 				s.ChannelMessageSend(m.ChannelID, *out)
 				return
 			}

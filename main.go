@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
-	"log"
 	"math/rand"
 	"os"
 	"os/signal"
@@ -13,6 +12,8 @@ import (
 
 	"github.com/mplewis/discosay/lib/bot"
 	"github.com/mplewis/discosay/lib/responder"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 	"gopkg.in/yaml.v3"
 )
 
@@ -24,7 +25,7 @@ type botSpec struct {
 func env(key string) string {
 	val := os.Getenv(key)
 	if val == "" {
-		log.Fatalf("Missing mandatory environment variable: %s", key)
+		log.Fatal().Str("key", key).Msg("Missing mandatory environment variable")
 	}
 	return val
 }
@@ -69,28 +70,28 @@ func parseConfig(rawYaml []byte) ([]botSpec, error) {
 	return botSpecs, nil
 }
 
-func test(resp responder.Responder, msg string) {
-	response := resp.Respond(msg)
-	if response != nil {
-		log.Printf("-> %s: %s", *resp.Name, *response)
-	}
-}
-
 func main() {
+	zerolog.SetGlobalLevel(zerolog.InfoLevel)
+	if os.Getenv("DEBUG") != "" {
+		zerolog.SetGlobalLevel(zerolog.DebugLevel)
+	}
+	if os.Getenv("DEVELOPMENT") != "" {
+		log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stdout})
+	}
 	rand.Seed(time.Now().UTC().UnixNano())
 
 	configPath := env("CONFIG_PATH")
 	rawYaml, err := ioutil.ReadFile(configPath)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal().Str("config_path", configPath).Err(err).Msg("Could not read config file")
 	}
 
 	botSpecs, err := parseConfig(rawYaml)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal().Str("config_path", configPath).Err(err).Msg("Could not parse config file")
 	}
 
-	fmt.Println("Registered bots:")
+	log.Info().Msg("Registered bots")
 	for _, botSpec := range botSpecs {
 		fmt.Println(botSpec.name)
 		for _, resp := range botSpec.responders {
@@ -98,15 +99,15 @@ func main() {
 		}
 	}
 
-	fmt.Println("Connecting...")
+	log.Info().Msg("Connecting...")
 	bots := []*bot.Bot{}
 	for _, botSpec := range botSpecs {
 		authToken := env(fmt.Sprintf("%s_AUTH_TOKEN", strings.ToUpper(botSpec.name)))
 		b, err := bot.New(botSpec.name, authToken, botSpec.responders)
 		if err != nil {
-			log.Fatal(err)
+			log.Fatal().Str("bot", *b.Name).Err(err).Msg("Failed to connect")
 		}
-		log.Printf("%s connected.", *b.Name)
+		log.Info().Str("bot", *b.Name).Msg("Connected")
 		bots = append(bots, b)
 	}
 
@@ -114,10 +115,10 @@ func main() {
 	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt, os.Kill)
 	<-sc
 
-	fmt.Println("Shutting down...")
+	log.Info().Msg("Shutting down")
 	for _, b := range bots {
 		if err := b.Close(); err != nil {
-			log.Println(err)
+			log.Err(err).Msg("Failed to close connection")
 		}
 	}
 }
