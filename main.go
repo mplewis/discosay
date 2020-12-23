@@ -61,7 +61,7 @@ func main() {
 
 	bots := []*bot.Bot{}
 	for _, spec := range botSpecs {
-		spec.AuthToken = env(fmt.Sprintf("%s_AUTH_TOKEN", strings.ToUpper(spec.Name)))
+		spec.SetAuthToken(env(fmt.Sprintf("%s_AUTH_TOKEN", strings.ToUpper(spec.Name))))
 		log.Info().Str("bot", spec.Name).Msg("Connecting...")
 
 		b, err := bot.New(spec)

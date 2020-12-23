@@ -1,6 +1,8 @@
 package bot
 
 import (
+	"fmt"
+
 	"github.com/bwmarrin/discordgo"
 	"github.com/mplewis/discosay/lib/responder"
 	"github.com/rs/zerolog/log"
@@ -15,13 +17,24 @@ type Bot struct {
 // Spec is the data needed to build and connect a bot.
 type Spec struct {
 	Name       string
-	AuthToken  string
+	AuthToken  *string
 	Responders []*responder.Responder
+}
+
+// SetAuthToken sets the auth token used to connect a bot to Discord.
+// You must set this before creating a bot with bot.New.
+// You can get this from the Discord Developer Portal (https://discord.com/developers/applications)
+// under [your app] -> Bot -> Token.
+func (spec *Spec) SetAuthToken(authToken string) {
+	spec.AuthToken = &authToken
 }
 
 // New builds a bot and connects it to Discord.
 func New(spec Spec) (*Bot, error) {
-	sess, err := discordgo.New("Bot " + spec.AuthToken)
+	if spec.AuthToken == nil {
+		return nil, fmt.Errorf("Must set auth token in bot.Spec before attempting to connect for %s", spec.Name)
+	}
+	sess, err := discordgo.New("Bot " + *spec.AuthToken)
 	if err != nil {
 		return nil, err
 	}
