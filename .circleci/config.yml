@@ -15,10 +15,10 @@ workflows:
           requires:
             - test
           filters:
+            branches:
+              only: master
             tags:
               only: /.*/
-            branches:
-              ignore: /.*/
 
 jobs:
   test:
