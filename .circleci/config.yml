@@ -10,7 +10,7 @@ workflows:
       - test
       - docker/publish:
           image: mplewis/discosay
-          tag: << pipeline.git.tag >>
+          tag: latest,<< pipeline.git.tag >>
           update-description: true
           requires:
             - test
