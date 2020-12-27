@@ -10,14 +10,15 @@ workflows:
       - test
       - docker/publish:
           image: mplewis/discosay
+          tag: << pipeline.git.tag >>
           update-description: true
           requires:
             - test
-          # filters:
-          #   tags:
-          #     only: /.*/
-          #   branches:
-          #     ignore: /.*/
+          filters:
+            tags:
+              only: /.*/
+            branches:
+              ignore: /.*/
 
 jobs:
   test:
