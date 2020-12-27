@@ -1,5 +1,4 @@
 .git
-cloudbuild
+discosay
 dist
-node_modules
-skaffold.yaml
+Dockerfile
