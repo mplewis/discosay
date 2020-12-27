@@ -13,11 +13,11 @@ workflows:
           update-description: true
           requires:
             - test
-          filters:
-            tags:
-              only: /.*/
-            branches:
-              ignore: /.*/
+          # filters:
+          #   tags:
+          #     only: /.*/
+          #   branches:
+          #     ignore: /.*/
 
 jobs:
   test:
