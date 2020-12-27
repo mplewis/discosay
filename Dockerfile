@@ -5,11 +5,6 @@ RUN CGO_ENABLED=0 go build .
 
 ########################################
 
-FROM build AS test
-RUN go test ./...
-
-########################################
-
 FROM alpine:latest as support
 RUN apk --no-cache add tzdata zip ca-certificates
 WORKDIR /usr/share/zoneinfo
