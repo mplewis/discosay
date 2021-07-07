@@ -6,9 +6,9 @@ Build auto-responding Discord bots.
 
 All configuration is done via environment variables.
 
-* `CONFIG_PATH`: Point this to a YAML config file for Discosay.
+* `CONFIG_PATH`: The path of a YAML config file for Discosay.
+* `CONFIG_URL`: The path of a URL returning a YAML config file for Discosay. (You must specify either path or URL.)
 * `DEBUG`: Set to enable debug-level logging.
-* `DEVELOPMENT`: Set to enable colorized human-readable output.
 
 ## Config Structure
 

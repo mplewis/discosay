@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
 	"math/rand"
 	"os"
 	"os/signal"
@@ -14,10 +13,10 @@ import (
 	"github.com/mplewis/discosay/lib/config"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
-	"gopkg.in/yaml.v3"
 )
 
-func env(key string) string {
+// mustEnv fetches the value of a mandatory environment variable.
+func mustEnv(key string) string {
 	val := os.Getenv(key)
 	if val == "" {
 		log.Fatal().Str("key", key).Msg("Missing mandatory environment variable")
@@ -25,31 +24,45 @@ func env(key string) string {
 	return val
 }
 
+// maybeEnv returns a value if an environment variable is found, and nil if not.
+func maybeEnv(key string) *string {
+	val, ok := os.LookupEnv(key)
+	if !ok {
+		return nil
+	}
+	return &val
+}
+
+// checkEnv returns true if an environment variable is set.
+func checkEnv(key string) bool {
+	_, ok := os.LookupEnv(key)
+	return ok
+}
+
+// tty returns true if the current terminal is interactive.
+func tty() bool {
+	fileInfo, _ := os.Stdout.Stat()
+	return (fileInfo.Mode() & os.ModeCharDevice) != 0
+}
+
 func main() {
 	zerolog.SetGlobalLevel(zerolog.InfoLevel)
-	if os.Getenv("DEBUG") != "" {
+	zerolog.TimeFieldFormat = zerolog.TimeFormatUnixMs
+	zerolog.DurationFieldUnit = time.Second
+	if checkEnv("DEBUG") {
 		zerolog.SetGlobalLevel(zerolog.DebugLevel)
 	}
-	if os.Getenv("DEVELOPMENT") != "" {
-		log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stdout})
+	if tty() {
+		log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr, TimeFormat: time.RFC3339})
 	}
+
 	rand.Seed(time.Now().UTC().UnixNano())
 
-	configPath := env("CONFIG_PATH")
-	rawYaml, err := ioutil.ReadFile(configPath)
+	csrc := config.Source{Path: maybeEnv("CONFIG_PATH"), URL: maybeEnv("CONFIG_URL")}
+	log.Info().Interface("source", csrc).Msg("Loading Discosay config")
+	botSpecs, err := config.Load(csrc)
 	if err != nil {
-		log.Fatal().Str("config_path", configPath).Err(err).Msg("Could not read config file")
-	}
-
-	configBlob := make(map[string]interface{})
-	err = yaml.Unmarshal(rawYaml, configBlob)
-	if err != nil {
-		log.Fatal().Str("config_path", configPath).Err(err).Msg("Could not unmarshal config file")
-	}
-
-	botSpecs, err := config.Parse(configBlob)
-	if err != nil {
-		log.Fatal().Str("config_path", configPath).Err(err).Msg("Could not parse config file")
+		log.Fatal().Err(err).Msg("Could not load config")
 	}
 
 	log.Info().Msg("Registered bots")
@@ -61,7 +74,7 @@ func main() {
 
 	bots := []*bot.Bot{}
 	for _, spec := range botSpecs {
-		spec.SetAuthToken(env(fmt.Sprintf("%s_AUTH_TOKEN", strings.ToUpper(spec.Name))))
+		spec.SetAuthToken(mustEnv(fmt.Sprintf("%s_AUTH_TOKEN", strings.ToUpper(spec.Name))))
 		log.Info().Str("bot", spec.Name).Msg("Connecting...")
 
 		b, err := bot.New(spec)
@@ -74,7 +87,7 @@ func main() {
 	}
 
 	sc := make(chan os.Signal, 1)
-	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt, os.Kill)
+	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt)
 	<-sc
 
 	log.Info().Msg("Shutting down")

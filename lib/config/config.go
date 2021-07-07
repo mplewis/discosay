@@ -1,9 +1,52 @@
 package config
 
 import (
+	"errors"
+	"io/ioutil"
+	"net/http"
+
 	"github.com/mplewis/discosay/lib/bot"
 	"github.com/mplewis/discosay/lib/responder"
+	"gopkg.in/yaml.v3"
 )
+
+// Source indicates the source location for a Discosay config.
+type Source struct {
+	Path *string
+	URL  *string
+}
+
+// Load loads and parses a config blob into Bot Specs.
+func Load(s Source) ([]bot.Spec, error) {
+	if s.Path == nil && s.URL == nil {
+		return nil, errors.New("config path and URL both unset")
+	}
+
+	var rawYaml []byte
+	if s.Path != nil {
+		y, err := ioutil.ReadFile(*s.Path)
+		if err != nil {
+			return nil, err
+		}
+		rawYaml = y
+	} else {
+		resp, err := http.Get(*s.URL)
+		if err != nil {
+			return nil, err
+		}
+		rawYaml, err = ioutil.ReadAll(resp.Body)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	configBlob := make(map[string]interface{})
+	err := yaml.Unmarshal(rawYaml, configBlob)
+	if err != nil {
+		return nil, err
+	}
+	return Parse(configBlob)
+}
 
 // Parse parses a config blob into Bot Specs.
 func Parse(config map[string]interface{}) ([]bot.Spec, error) {
