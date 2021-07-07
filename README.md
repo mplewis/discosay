@@ -6,12 +6,12 @@ Build auto-responding Discord bots.
 
 All configuration is done via environment variables:
 
-| Name                     | Example                                     | Description                                                                                         |
-| ------------------------ | ------------------------------------------- | --------------------------------------------------------------------------------------------------- |
-| `CONFIG_PATH`            | `/path/to/my/config.yaml`                   | The path of a YAML config file for Discosay.                                                        |
-| `CONFIG_URL`             | `http://example.com/path/to/my/config.yaml` | The path of a URL returning a YAML config file for Discosay. (You must specify either path or URL.) |
-| `CONFIG_UPDATE_INTERVAL` | `15`                                        | If set, polls for config updates at the given interval, in seconds.                                 |
-| `DEBUG`                  | `1`                                         | Set to enable debug-level logging.                                                                  |
+| Name                     | Example                                     | Description                                                                                |
+| ------------------------ | ------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| `CONFIG_PATH`            | `/path/to/my/config.yaml`                   | The path to a YAML config file for Discosay.                                               |
+| `CONFIG_URL`             | `http://example.com/path/to/my/config.yaml` | A URL that returns a YAML config file for Discosay. (You must specify either path or URL.) |
+| `CONFIG_UPDATE_INTERVAL` | `15`                                        | If set, polls for config updates at the given interval, in seconds.                        |
+| `DEBUG`                  | `1`                                         | Set to enable debug-level logging.                                                         |
 
 ## Config Structure
 
