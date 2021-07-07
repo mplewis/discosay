@@ -5,6 +5,7 @@ import (
 	"math/rand"
 	"os"
 	"os/signal"
+	"strconv"
 	"strings"
 	"syscall"
 	"time"
@@ -45,6 +46,38 @@ func tty() bool {
 	return (fileInfo.Mode() & os.ModeCharDevice) != 0
 }
 
+// openBots instantiates and connects all bots to Discord.
+func openBots(botSpecs []bot.Spec) ([]*bot.Bot, error) {
+	bots := []*bot.Bot{}
+	for _, spec := range botSpecs {
+		spec.SetAuthToken(mustEnv(fmt.Sprintf("%s_AUTH_TOKEN", strings.ToUpper(spec.Name))))
+		log.Info().Str("bot", spec.Name).Msg("Connecting...")
+
+		b, err := bot.New(spec)
+		log := log.With().Str("name", *b.Name).Logger()
+		if err != nil {
+			log.Error().Err(err).Msg("Could not connect bot")
+			return nil, err
+		}
+
+		log.Info().Msg("Connected")
+		bots = append(bots, b)
+	}
+	return bots, nil
+}
+
+// closeBots disconnects all bots from Discord.
+func closeBots(bots []*bot.Bot) error {
+	var e error
+	for _, b := range bots {
+		if err := b.Close(); err != nil {
+			e = err
+			log.Err(err).Msg("Failed to close connection")
+		}
+	}
+	return e
+}
+
 func main() {
 	zerolog.SetGlobalLevel(zerolog.InfoLevel)
 	zerolog.TimeFieldFormat = zerolog.TimeFormatUnixMs
@@ -59,8 +92,8 @@ func main() {
 	rand.Seed(time.Now().UTC().UnixNano())
 
 	csrc := config.Source{Path: maybeEnv("CONFIG_PATH"), URL: maybeEnv("CONFIG_URL")}
-	log.Info().Interface("source", csrc).Msg("Loading Discosay config")
-	botSpecs, err := config.Load(csrc)
+	log.Info().Interface("config_source", csrc).Msg("Loading Discosay config")
+	botSpecs, hash, err := config.Load(csrc)
 	if err != nil {
 		log.Fatal().Err(err).Msg("Could not load config")
 	}
@@ -72,18 +105,45 @@ func main() {
 		}
 	}
 
-	bots := []*bot.Bot{}
-	for _, spec := range botSpecs {
-		spec.SetAuthToken(mustEnv(fmt.Sprintf("%s_AUTH_TOKEN", strings.ToUpper(spec.Name))))
-		log.Info().Str("bot", spec.Name).Msg("Connecting...")
+	bots, err := openBots(botSpecs)
+	if err != nil {
+		log.Fatal().Err(err).Msg("Could not connect bot")
+	}
 
-		b, err := bot.New(spec)
+	intRaw := maybeEnv("CONFIG_UPDATE_INTERVAL")
+	if intRaw != nil {
+		log := log.With().Interface("config_source", csrc).Logger()
+
+		intSecs, err := strconv.Atoi(*intRaw)
 		if err != nil {
-			log.Fatal().Str("bot", *b.Name).Err(err).Msg("Failed to connect")
+			log.Fatal().Err(err).Msg("Could not parse CONFIG_UPDATE_INTERVAL")
 		}
 
-		log.Info().Str("bot", *b.Name).Msg("Connected")
-		bots = append(bots, b)
+		interval := time.Duration(intSecs) * time.Second
+		t := time.Tick(interval)
+		for {
+			<-t
+			botSpecs, newHash, err := config.Load(csrc)
+			if err != nil {
+				log.Error().Err(err).Interface("source", csrc).Msg("Failed to load config, using last good config")
+			}
+			if hash == newHash {
+				log.Debug().Msg("Config unchanged")
+				continue
+			}
+
+			log.Info().Msg("Config changed, reloading bots")
+			hash = newHash
+			err = closeBots(bots)
+			if err != nil {
+				log.Fatal().Err(err).Msg("Failed to shutdown bots after config update")
+			}
+			newBots, err := openBots(botSpecs)
+			if err != nil {
+				log.Fatal().Err(err).Msg("Failed to start bots after config update")
+			}
+			bots = newBots
+		}
 	}
 
 	sc := make(chan os.Signal, 1)
@@ -91,9 +151,5 @@ func main() {
 	<-sc
 
 	log.Info().Msg("Shutting down")
-	for _, b := range bots {
-		if err := b.Close(); err != nil {
-			log.Err(err).Msg("Failed to close connection")
-		}
-	}
+	closeBots(bots)
 }
