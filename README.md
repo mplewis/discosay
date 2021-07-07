@@ -4,11 +4,14 @@ Build auto-responding Discord bots.
 
 # Usage
 
-All configuration is done via environment variables.
+All configuration is done via environment variables:
 
-* `CONFIG_PATH`: Point this to a YAML config file for Discosay.
-* `DEBUG`: Set to enable debug-level logging.
-* `DEVELOPMENT`: Set to enable colorized human-readable output.
+| Name                     | Example                                     | Description                                                                                |
+| ------------------------ | ------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| `CONFIG_PATH`            | `/path/to/my/config.yaml`                   | The path to a YAML config file for Discosay.                                               |
+| `CONFIG_URL`             | `http://example.com/path/to/my/config.yaml` | A URL that returns a YAML config file for Discosay. (You must specify either path or URL.) |
+| `CONFIG_UPDATE_INTERVAL` | `15`                                        | If set, polls for config updates at the given interval, in seconds.                        |
+| `DEBUG`                  | `1`                                         | Set to enable debug-level logging.                                                         |
 
 ## Config Structure
 
@@ -53,10 +56,10 @@ responders:
       - Danger, Will Robinson!
 ```
 
-* `templates`: A `dict[str: str]` of named templates that responders can optionally use.
-* `bots`: A `dict[str: array[str]]` of bots and the named responders they use.
-* `responders`: A `dict[str, dict]` of responders that bots use.
-  * `match`: A regex string. If this regex matches a message, the responder will reply in the channel. If this regex has a capture group, it will be used as the reply.
-  * `responses`: Optional. An `array[str]` of possible responses. If provided, the responder selects one of these as the reply.
-  * `template`: Optional. String. If provided, the reply message is injected into this template in place of the string `$MSG`.
-  * `probability`: Optional. Float from 0.0 to 1.0. Defaults to 1.0 (100%). If provided, this is the probability this responder will send a reply for a message it matches.
+- `templates`: A `dict[str: str]` of named templates that responders can optionally use.
+- `bots`: A `dict[str: array[str]]` of bots and the named responders they use.
+- `responders`: A `dict[str, dict]` of responders that bots use.
+  - `match`: A regex string. If this regex matches a message, the responder will reply in the channel. If this regex has a capture group, it will be used as the reply.
+  - `responses`: Optional. An `array[str]` of possible responses. If provided, the responder selects one of these as the reply.
+  - `template`: Optional. String. If provided, the reply message is injected into this template in place of the string `$MSG`.
+  - `probability`: Optional. Float from 0.0 to 1.0. Defaults to 1.0 (100%). If provided, this is the probability this responder will send a reply for a message it matches.

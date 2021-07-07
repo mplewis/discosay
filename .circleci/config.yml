@@ -15,6 +15,8 @@ workflows:
           image: mplewis/discosay
           tag: latest,<< pipeline.git.tag >>
           update-description: true
+          context:
+            - Docker Hub
           requires:
             - test
           filters:
