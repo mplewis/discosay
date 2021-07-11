@@ -32,7 +32,7 @@ func (spec *Spec) SetAuthToken(authToken string) {
 // New builds a bot and connects it to Discord.
 func New(spec Spec) (*Bot, error) {
 	if spec.AuthToken == nil {
-		return nil, fmt.Errorf("Must set auth token in bot.Spec before attempting to connect for %s", spec.Name)
+		return nil, fmt.Errorf("must set auth token in bot.Spec before attempting to connect for %s", spec.Name)
 	}
 	sess, err := discordgo.New("Bot " + *spec.AuthToken)
 	if err != nil {
