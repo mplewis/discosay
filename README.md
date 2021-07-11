@@ -62,4 +62,6 @@ responders:
   - `match`: A regex string. If this regex matches a message, the responder will reply in the channel. If this regex has a capture group, it will be used as the reply.
   - `responses`: Optional. An `array[str]` of possible responses. If provided, the responder selects one of these as the reply.
   - `template`: Optional. String. If provided, the reply message is injected into this template in place of the string `$MSG`.
+  - `case_sensitive`: Optional. Bool. Defaults to true. If false, the `match` regex will match regardless of case.
+  - `delete_parent`: Optional. Bool. If true, this responder deletes the parent message after responding.
   - `probability`: Optional. Float from 0.0 to 1.0. Defaults to 1.0 (100%). If provided, this is the probability this responder will send a reply for a message it matches.
