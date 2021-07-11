@@ -67,8 +67,15 @@ func buildMessageHandler(botName *string, responders []*responder.Responder) fun
 					Str("inMsg", m.Message.Content).
 					Str("responder", *r.Name).
 					Str("msg", *out).
+					Bool("deleteParent", r.DeleteParent).
 					Send()
+
+				if r.DeleteParent {
+					fmt.Println(m.ChannelID, m.Message.ID)
+					s.ChannelMessageDelete(m.ChannelID, m.Message.ID)
+				}
 				s.ChannelMessageSend(m.ChannelID, *out)
+
 				return
 			}
 		}

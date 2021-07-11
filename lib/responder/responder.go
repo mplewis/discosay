@@ -23,6 +23,9 @@ type Responder struct {
 	// Optional. Insert the response into this template, replacing $MSG. If omitted, just send the response as-is
 	Template *string
 
+	// Optional. If set, delete the parent message which triggered the responder
+	DeleteParent bool
+
 	// Optional. If provided, the probability from 0.0 to 1.0 that this
 	// responder will fire on any given matched message
 	Probability *float64
@@ -43,27 +46,38 @@ func (r *Responder) String() string {
 }
 
 // New builds a Responder from a YAML config blob.
-func New(name string, from map[string]interface{}) (*Responder, error) {
-	re, err := regexp.Compile(from["match"].(string))
+func New(name string, config map[string]interface{}) (*Responder, error) {
+	reTmpl := config["match"].(string)
+	if ci := config["case_sensitive"]; ci != nil {
+		if !ci.(bool) {
+			reTmpl = fmt.Sprintf("(?i)%s", reTmpl)
+		}
+	}
+	re, err := regexp.Compile(reTmpl)
 	if err != nil {
 		return nil, err
 	}
 
 	responses := []string{}
-	if rr := from["responses"]; rr != nil {
+	if rr := config["responses"]; rr != nil {
 		for _, resp := range rr.([]interface{}) {
 			responses = append(responses, resp.(string))
 		}
 	}
 
 	var template *string = nil
-	if tp := from["template"]; tp != nil {
+	if tp := config["template"]; tp != nil {
 		s := tp.(string)
 		template = &s
 	}
 
+	deleteParent := false
+	if dp := config["delete_parent"]; dp != nil {
+		deleteParent = dp.(bool)
+	}
+
 	var probability *float64 = nil
-	if pb := from["probability"]; pb != nil {
+	if pb := config["probability"]; pb != nil {
 		f := pb.(float64)
 		probability = &f
 	}
@@ -73,6 +87,7 @@ func New(name string, from map[string]interface{}) (*Responder, error) {
 		Match:        re,
 		Responses:    &responses,
 		TemplateName: template,
+		DeleteParent: deleteParent,
 		Probability:  probability,
 	}, err
 }
