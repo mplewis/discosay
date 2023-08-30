@@ -7,5 +7,5 @@ require (
 	github.com/onsi/ginkgo v1.14.2 // test
 	github.com/onsi/gomega v1.10.4 // test
 	github.com/rs/zerolog v1.20.0
-	gopkg.in/yaml.v3 v3.0.0-20200615113413-eeeca48fe776
+	gopkg.in/yaml.v3 v3.0.0
 )
